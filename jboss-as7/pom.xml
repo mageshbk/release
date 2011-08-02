@@ -160,6 +160,24 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>install-switchyard-component-bpm</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                          <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.switchyard.components</groupId>
+                                    <artifactId>switchyard-component-bpm</artifactId>
+                                    <type>zip</type>
+                                    <version>${project.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${staging.jboss.dir}</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>install-distribution-files</id>
                         <phase>generate-sources</phase>
                         <goals>
