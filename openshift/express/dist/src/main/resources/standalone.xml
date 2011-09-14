@@ -201,7 +201,12 @@
         <subsystem xmlns="urn:jboss:domain:switchyard:1.0">
             <modules>
                 <module identifier="org.switchyard.component.bean"/>
-                <module identifier="org.switchyard.component.soap"/>
+                <module identifier="org.switchyard.component.soap">
+                    <properties>
+                        <serverHost>localhost</serverHost>
+                        <serverPort>18001</serverPort>
+                    </properties>
+                </module>
                 <module identifier="org.switchyard.component.camel"/>
                 <module identifier="org.switchyard.component.rules"/>
                 <module identifier="org.switchyard.component.bpm"/>
