@@ -18,6 +18,8 @@
  */
 package org.switchyard.as7.extension.deployment;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.enterprise.inject.spi.Extension;
@@ -33,6 +35,8 @@ import org.jboss.as.weld.deployment.WeldAttachments;
 import org.jboss.modules.Module;
 import org.jboss.weld.bootstrap.spi.Metadata;
 import org.switchyard.as7.extension.SwitchYardDeploymentMarker;
+import org.switchyard.common.cdi.CDIUtil;
+import org.switchyard.common.type.Classes;
 
 /**
  * Deployment processor that installs the SwitchYard CDI extension.
@@ -87,19 +91,32 @@ public class SwitchYardCdiIntegrationProcessor implements DeploymentUnitProcesso
 
             try {
                 Class<?> extensionClass = module.getClassLoader().loadClass(extensionName);
-                final Extension extensionInstance = (Extension) extensionClass.newInstance();
-
-                Metadata<Extension> metadata = new Metadata<Extension>() {
-                    @Override
-                    public Extension getValue() {
-                        return extensionInstance;
+                Extension extensionInstance = null;
+                if (DELTASPIKE_CDI_EXTENSION.equals(extensionName)) {
+                    // Deltaspike BeanManagerProvider is singleton
+                    Method m = extensionClass.getMethod("getInstance");
+                    try {
+                        extensionInstance = (Extension) m.invoke(null);
+                    } catch (InvocationTargetException ite) {
+                        if (ite.getCause() instanceof IllegalStateException) {
+                            extensionInstance = (Extension) extensionClass.newInstance();
+                            m = extensionClass.getDeclaredMethod("setBeanManagerProvider", extensionClass);
+                            m.setAccessible(true);
+                            m.invoke(null, extensionInstance);
+                            m.setAccessible(false);
+                        }
                     }
-
-                    @Override
-                    public String getLocation() {
-                        return extensionName;
+                    if (deploymentUnit.getParent() != null) {
+                        // Trick DeltaSpike to create a BeanManagerInfo based on this deployment module
+                        ClassLoader old = Classes.setTCCL(module.getClassLoader());
+                        CDIUtil.lookupBeanManager();
+                        Classes.setTCCL(old);
                     }
-                };
+                } else {
+                    extensionInstance = (Extension) extensionClass.newInstance();
+                }
+
+                Metadata<Extension> metadata = new MetadataImpl<Extension>(extensionInstance, deploymentUnit.getName());
                 parent.addToAttachmentList(WeldAttachments.PORTABLE_EXTENSIONS, metadata);
             } catch (InstantiationException ie) {
                 throw new DeploymentUnitProcessingException(ie);
@@ -107,6 +124,10 @@ public class SwitchYardCdiIntegrationProcessor implements DeploymentUnitProcesso
                 throw new DeploymentUnitProcessingException(iae);
             } catch (ClassNotFoundException cnfe) {
                 throw new DeploymentUnitProcessingException(cnfe);
+            } catch (NoSuchMethodException nsme) {
+                throw new DeploymentUnitProcessingException(nsme);
+            } catch (InvocationTargetException ite) {
+                throw new DeploymentUnitProcessingException(ite);
             }
         }
     }
@@ -116,6 +137,27 @@ public class SwitchYardCdiIntegrationProcessor implements DeploymentUnitProcesso
      */
     @Override
     public void undeploy(DeploymentUnit context) {
+    }
+
+    private class MetadataImpl<T> implements Metadata<T> {
+
+        private T _extensionInstance;
+        private String _location;
+
+        public MetadataImpl(T extensionInstance, String location) {
+            _extensionInstance = extensionInstance;
+            _location = location;
+        }
+
+        @Override
+        public T getValue() {
+            return _extensionInstance;
+        }
+
+        @Override
+        public String getLocation() {
+            return _location;
+        }
     }
 
 }
