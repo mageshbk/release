@@ -147,7 +147,7 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-            <plugin>
+            <!--<plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
@@ -338,7 +338,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
             <!-- Configure the Surefire plugin for running the tests.  Be sure to make these same setting if running in your IDE... -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

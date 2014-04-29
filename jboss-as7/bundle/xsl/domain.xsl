@@ -116,6 +116,7 @@
                 <module identifier="org.switchyard.component.camel.core" implClass="org.switchyard.component.camel.core.deploy.CamelCoreComponent"/>
                 <module identifier="org.switchyard.component.camel.file" implClass="org.switchyard.component.camel.file.deploy.CamelFileComponent"/>
                 <module identifier="org.switchyard.component.camel.ftp" implClass="org.switchyard.component.camel.ftp.deploy.CamelFtpComponent"/>
+                <module identifier="org.switchyard.component.camel.http4" implClass="org.switchyard.component.camel.http4.deploy.CamelHttpComponent"/>
                 <module identifier="org.switchyard.component.camel.jms" implClass="org.switchyard.component.camel.jms.deploy.CamelJmsComponent"/>
                 <module identifier="org.switchyard.component.camel.jpa" implClass="org.switchyard.component.camel.jpa.deploy.CamelJpaComponent"/>
                 <module identifier="org.switchyard.component.camel.mail" implClass="org.switchyard.component.camel.mail.deploy.CamelMailComponent"/>
